@@ -19,6 +19,7 @@ func initializeBikeRoutes(app: App) {
     app.router.get("/bikes", handler: getBikes)
     app.router.post("/bikes", handler: addBike)
     app.router.delete("/bike", handler: deleteBike)
+    app.router.get("/bike", handler: getBike)
 }
 
 private func getBikes(completion: @escaping ([Bike]?, RequestError?) -> Void) {
@@ -27,6 +28,18 @@ private func getBikes(completion: @escaping ([Bike]?, RequestError?) -> Void) {
     }
     Bike.Persistence.getAll(from: database) { (bikes, error) in
         return completion(bikes, error as? RequestError)
+    }
+}
+
+private func getBike(id: String, completion: @escaping (Bike?, RequestError?) -> Void) {
+    guard let database = database else {
+        return completion(nil,.internalServerError)
+    }
+    Bike.Persistence.get(from: database, with: id) { (bike, error) in
+        guard let bike = bike else {
+            return completion(nil,.notAcceptable)
+        }
+        completion(bike,nil)
     }
 }
 
